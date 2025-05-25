@@ -1,0 +1,6 @@
+@_304.Net.Platform_HostAddress = http://localhost:5182
+
+GET {{_304.Net.Platform_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

@@ -1,0 +1,23 @@
+﻿using Core.Base.EF;
+using Core.Pagination;
+using System;
+using System.Collections.Generic;
+using System.Text;
+
+namespace Core.ExtensionAndSort;
+public static class FilterExtensions
+{
+	public static IQueryable<T> ApplyFilter<T>(this IQueryable<T> query, DefaultPaginationFilter filter)
+		where T : class, IBaseEntity
+	{
+		if (!string.IsNullOrWhiteSpace(filter.Keyword))
+		{
+			var keyword = filter.Keyword.ToLower().Trim();
+			query = query.Where(x =>
+				(x.name != null && x.name.ToLower().Contains(keyword)) ||
+				(x.slug != null && x.slug.ToLower().Contains(keyword)));
+		}
+
+		return query;
+	}
+}
