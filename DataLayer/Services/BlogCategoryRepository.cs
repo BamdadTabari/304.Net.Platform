@@ -1,8 +1,9 @@
 ﻿using Core.Base.EF;
 using Core.EntityFramework.Models;
 using Core.Pagination;
+using DataLayer.Repository;
 using Microsoft.EntityFrameworkCore;
-namespace DataLayer;
+namespace DataLayer.Services;
 public interface IBlogCategoryRepository : IRepository<BlogCategory>
 {
 }

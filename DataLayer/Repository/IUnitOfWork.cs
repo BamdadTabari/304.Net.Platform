@@ -1,7 +1,8 @@
 ﻿using Core.Base.EF;
+using DataLayer.Services;
 using System.Threading;
 
-namespace DataLayer;
+namespace DataLayer.Repository;
 public interface IUnitOfWork : IDisposable
 {
 	IBlogCategoryRepository BlogCategoryRepository { get; }

@@ -8,7 +8,7 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Text;
 
-namespace DataLayer;
+namespace DataLayer.Repository;
 public interface IRepository<TEntity> where TEntity : class, IBaseEntity
 {
 	Task<bool> ExistsAsync();
@@ -193,8 +193,8 @@ public class Repository<TEntity> : IRepository<TEntity> where TEntity : class, I
 		if (typeof(IBaseEntity).IsAssignableFrom(typeof(TEntity)))
 		{
 			var filterableQuery = query.Cast<IBaseEntity>();
-			filterableQuery = FilterExtensions.ApplyFilter(filterableQuery, filter);
-			filterableQuery = SortExtensions.ApplySort(filterableQuery, filter.SortBy);
+			filterableQuery = filterableQuery.ApplyFilter(filter);
+			filterableQuery = filterableQuery.ApplySort(filter.SortBy);
 			query = filterableQuery.Cast<TEntity>();
 		}
 		else

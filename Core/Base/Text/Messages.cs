@@ -6,9 +6,9 @@ using System.Text;
 namespace Core.Base.Text;
 public static class Messages
 {
-	public static string Fail => "عملیات ناموفق بود";
+	public static string Fail() => "عملیات ناموفق بود";
 
-	public static string Success => "عملیات موفق بود";
+	public static string Success() => "عملیات موفق بود";
 
 	public static string NotFound(string? name) =>
 		!string.IsNullOrWhiteSpace(name) ? $"{name} پیدا نشد" : "آیتم پیدا نشد";

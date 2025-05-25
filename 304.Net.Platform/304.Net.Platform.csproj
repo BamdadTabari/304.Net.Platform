@@ -10,8 +10,6 @@
   <ItemGroup>
     <PackageReference Include="Hangfire" Version="1.8.20" />
     <PackageReference Include="Kavenegar" Version="1.2.5" />
-    <PackageReference Include="MediatR" Version="12.5.0" />
-    <PackageReference Include="MediatR.Extensions.Microsoft.DependencyInjectionFixed" Version="5.1.2" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.5">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
