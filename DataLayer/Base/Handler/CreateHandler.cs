@@ -16,28 +16,29 @@ public class CreateHandler
 		_unitOfWork = unitOfWork;
 	}
 
-	public async Task<ResponseDto<string>> HandleAsync(
+	public async Task<ResponseDto<TResult>> HandleAsync<TResult>(
 		Func<Task<bool>> isNameValid,
 		Func<Task<bool>> isSlugValid,
-		string propertyName,
-		Func<Task<string>> onCreate,
+		Func<Task<TResult>> onCreate,
+		string nameProperty = "نام",
+		string slugProperty = "نامک",
 		CancellationToken cancellationToken = default)
 	{
 		if (!await isNameValid())
-			return Responses.Exist<string>(null, null, propertyName);
+			return Responses.Exist<TResult>(default, null, nameProperty);
 
 		if (await isSlugValid())
-			return Responses.Exist<string>(null,null, "نامک");
+			return Responses.Exist<TResult>(default, null, slugProperty);
 
 		try
 		{
 			var result = await onCreate();
 			await _unitOfWork.CommitAsync(cancellationToken);
-			return Responses.Success(result);
+			return Responses.Success(result, null, 201);
 		}
 		catch (Exception ex)
 		{
-			return Responses.Fail("خطا در انجام عملیات: " + ex.Message);
+			return Responses.Fail<TResult>(default, ex.Message);
 		}
 	}
 }
