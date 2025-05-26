@@ -36,8 +36,8 @@ public class GetAllHandler
 	{
 		try
 		{
-			// تبدیل لیست موجودیت‌ها به لیست DTO با استفاده از AutoMapper
-			var dtoList = Mapper.Mapper.Map<List<TEntity>, List<TDto>>(entities);
+			// تبدیل هر آیتم در لیست به صورت مجزا
+			var dtoList = entities.Select(e => Mapper.Mapper.Map<TEntity, TDto>(e)).ToList();
 
 			// بازگرداندن لیست به صورت پاسخ موفق
 			return Responses.Data(dtoList);
