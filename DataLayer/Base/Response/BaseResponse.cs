@@ -1,10 +1,32 @@
 ﻿namespace DataLayer.Base.Response;
 
+/// <summary>
+/// کلاس پایه برای پاسخ‌ها که شامل اطلاعات مشترک مانند شناسه، نام، نامک و تاریخ‌های ایجاد و بروزرسانی است.
+/// </summary>
 public class BaseResponse
 {
-    public long id { get; set; }
-    public string name { get; set; }
-    public string slug { get; set; }
-    public DateTime created_at { get; set; }
-    public DateTime updated_at { get; set; }
+	/// <summary>
+	/// شناسه یکتا
+	/// </summary>
+	public long id { get; set; }
+
+	/// <summary>
+	/// نام مورد نظر
+	/// </summary>
+	public string name { get; set; }
+
+	/// <summary>
+	/// نامک (Slug) برای شناسه قابل خواندن در URL
+	/// </summary>
+	public string slug { get; set; }
+
+	/// <summary>
+	/// زمان ایجاد رکورد
+	/// </summary>
+	public DateTime created_at { get; set; }
+
+	/// <summary>
+	/// زمان آخرین بروزرسانی رکورد
+	/// </summary>
+	public DateTime updated_at { get; set; }
 }

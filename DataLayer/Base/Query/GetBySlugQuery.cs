@@ -3,9 +3,18 @@ using MediatR;
 using System.ComponentModel.DataAnnotations;
 
 namespace DataLayer.Base.Query;
+
+/// <summary>
+/// کوئری عمومی برای دریافت یک رکورد از نوع <typeparamref name="T"/> بر اساس مقدار slug (نامک).
+/// </summary>
+/// <typeparam name="T">نوع داده‌ای که قرار است بازیابی شود.</typeparam>
 public class GetBySlugQuery<T> : IRequest<ResponseDto<T>>
 {
-    [Display(Name = "نامک")]
-    [Required(ErrorMessage = "لطفا مقدار {0} را وارد کنید")]
-    public string slug { get; set; }
+	/// <summary>
+	/// نامک (Slug) مورد نظر برای جستجو.
+	/// این فیلد اجباری است و باید مقداردهی شود.
+	/// </summary>
+	[Display(Name = "نامک")]
+	[Required(ErrorMessage = "لطفا مقدار {0} را وارد کنید")]
+	public string slug { get; set; }
 }
