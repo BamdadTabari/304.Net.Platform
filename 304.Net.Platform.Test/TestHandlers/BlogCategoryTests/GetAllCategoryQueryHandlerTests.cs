@@ -1,6 +1,7 @@
 ﻿using _304.Net.Platform.Application.BlogCategoryFeatures.Handler;
 using _304.Net.Platform.Application.BlogCategoryFeatures.Query;
 using _304.Net.Platform.Application.BlogCategoryFeatures.Response;
+using _304.Net.Platform.Test.DataProvider;
 using _304.Net.Platform.Test.GenericHandlers;
 using Core.EntityFramework.Models;
 using DataLayer.Services;
@@ -16,9 +17,9 @@ public class GetAllCategoryQueryHandlerTests
     {   
         var categories = new List<BlogCategory>
         {
-            new BlogCategory { id = 1, name = "Tech", slug = "tech" , description="", created_at= DateTime.Now, updated_at = DateTime.Now},
-            new BlogCategory { id = 2, name = "Health", slug = "health" , description="", created_at= DateTime.Now, updated_at = DateTime.Now}
-        };
+		    BlogCategoryDataProvider.Row(name: "Name 1", id: 1),
+			BlogCategoryDataProvider.Row(name: "Name 2", id: 2)
+		};
 
         await GetAllHandlerTestHelper.TestHandle_Success
                <BlogCategory, BlogCategoryResponse, IBlogCategoryRepository, GetAllCategoryQueryHandler>(

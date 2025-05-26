@@ -1,6 +1,7 @@
 ﻿using _304.Net.Platform.Application.BlogCategoryFeatures.Handler;
 using _304.Net.Platform.Application.BlogCategoryFeatures.Query;
 using _304.Net.Platform.Application.BlogCategoryFeatures.Response;
+using _304.Net.Platform.Test.DataProvider;
 using _304.Net.Platform.Test.GenericHandlers;
 using Core.EntityFramework.Models;
 using DataLayer.Services;
@@ -14,21 +15,16 @@ public class GetCategoryBySlugQueryHandlerTests
     [Fact]
     public async Task Handle_ShouldReturnData_WhenCategoryExists()
     {
-        var category = new BlogCategory
-        {
-            id = 1,
-            name = "Tech",
-            slug = "tech",
-            description = "Tech Category"
-        };
+        var category = BlogCategoryDataProvider.Row(name: "Name", id: 1, slug: "slug");
 
-        await GetBySlugHandlerTestHelper.TestGetBySlug_Success<
+
+		await GetBySlugHandlerTestHelper.TestGetBySlug_Success<
             BlogCategory,
             BlogCategoryResponse,
             IBlogCategoryRepository,
             GetCategoryBySlugQueryHandler>(
                 uow => new GetCategoryBySlugQueryHandler(uow),
-                (handler, token) => handler.Handle(new GetCategoryBySlugQuery { slug = "tech" }, token),
+                (handler, token) => handler.Handle(BlogCategoryDataProvider.GetBySlug(slug:"slug"), token),
                 uow => uow.BlogCategoryRepository,
                 category
         );
@@ -43,7 +39,7 @@ public class GetCategoryBySlugQueryHandlerTests
             IBlogCategoryRepository,
             GetCategoryBySlugQueryHandler>(
                 uow => new GetCategoryBySlugQueryHandler(uow),
-                (handler, token) => handler.Handle(new GetCategoryBySlugQuery { slug = "not-found" }, token),
+                (handler, token) => handler.Handle(BlogCategoryDataProvider.GetBySlug(slug: "not-found"), token),
                 uow => uow.BlogCategoryRepository
         );
     }

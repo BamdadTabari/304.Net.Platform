@@ -1,5 +1,6 @@
 ﻿using _304.Net.Platform.Application.BlogCategoryFeatures.Handler;
 using _304.Net.Platform.Application.BlogCategoryFeatures.Query;
+using _304.Net.Platform.Test.DataProvider;
 using _304.Net.Platform.Test.GenericHandlers;
 using Core.EntityFramework.Models;
 using Core.Pagination;
@@ -12,24 +13,12 @@ public class GetPaginatedCategoryQueryHandlerTests
     [Fact]
     public async Task Handle_ShouldReturnPaginatedList_WhenCategoriesExist()
     {
-        // Arrange
-        var categories = new List<BlogCategory>
-        {
-            new BlogCategory { id = 1, name = "Tech" },
-            new BlogCategory { id = 2, name = "Health" }
-        };
+        var paginatedList = BlogCategoryDataProvider.GetPaginatedList();
 
-        var paginatedList = new PaginatedList<BlogCategory>(categories, count: 2, page: 1, pageSize: 10);
+        var query = BlogCategoryDataProvider.GetByQueryFilter();
 
-        var query = new GetPaginatedCategoryQuery
-        {
-            Page = 1,
-            PageSize = 10,
-            SearchTerm = ""
-        };
-
-        // Act + Assert
-        await GetPaginatedHandlerTestHelper.TestPaginated_Success<
+		// Act + Assert
+		await GetPaginatedHandlerTestHelper.TestPaginated_Success<
             BlogCategory,
             IBlogCategoryRepository,
             GetPaginatedCategoryQueryHandler,
@@ -47,25 +36,20 @@ public class GetPaginatedCategoryQueryHandlerTests
     {
         // Arrange
         var categories = new List<BlogCategory>
-    {
-         new BlogCategory { id = 1, name = "Tech" },
-         new BlogCategory { id = 2, name = "Health" }
-    };
+        {
+			BlogCategoryDataProvider.Row(id: 1, name: "Health"),
+			BlogCategoryDataProvider.Row(id: 1, name: "Tech")
+		};
 
         var paginatedList = new PaginatedList<BlogCategory>(
             categories.Where(c => c.name.Contains("Tech")).ToList(),
             count: 1, page: 1, pageSize: 10
         );
 
-        var query = new GetPaginatedCategoryQuery
-        {
-            Page = 1,
-            PageSize = 10,
-            SearchTerm = "Tech"
-        };
+        var query = BlogCategoryDataProvider.GetByQueryFilter(searchTerm: "Tech");
 
-        // Act + Assert
-        await GetPaginatedHandlerTestHelper.TestPaginated_Success<
+		// Act + Assert
+		await GetPaginatedHandlerTestHelper.TestPaginated_Success<
             BlogCategory,
             IBlogCategoryRepository,
             GetPaginatedCategoryQueryHandler,
@@ -83,13 +67,9 @@ public class GetPaginatedCategoryQueryHandlerTests
     {
         var paginatedList = new PaginatedList<BlogCategory>(new List<BlogCategory>(), 0, 1, 10);
 
-        var query = new GetPaginatedCategoryQuery
-        {
-            Page = 1,
-            PageSize = 10,
-        };
+        var query = BlogCategoryDataProvider.GetByQueryFilter();
 
-        await GetPaginatedHandlerTestHelper.TestPaginated_Success<
+		await GetPaginatedHandlerTestHelper.TestPaginated_Success<
             BlogCategory,
             IBlogCategoryRepository,
             GetPaginatedCategoryQueryHandler,

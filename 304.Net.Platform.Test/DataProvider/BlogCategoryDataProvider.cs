@@ -8,7 +8,7 @@ using System.Collections.Generic;
 using System.Text;
 
 namespace _304.Net.Platform.Test.DataProvider;
-internal static class BlogCategoryDataProvider
+public static class BlogCategoryDataProvider
 {
     public static CreateCategoryCommand Create(string name = "name")
         => new CreateCategoryCommand()
@@ -30,23 +30,34 @@ internal static class BlogCategoryDataProvider
             updated_at = DateTime.Now,
         };
 
-    public static DeleteCategoryCommand Delete(long id = 1)
+
+	public static BlogCategory Row(string name = "name", long id = 1, string slug = "slug")
+	=> new BlogCategory()
+	{
+		id = id,
+		name = name,
+		description = "description",
+		slug = slug,
+		updated_at = DateTime.Now,
+	};
+
+	public static DeleteCategoryCommand Delete(long id = 1)
         => new DeleteCategoryCommand()
         {
             id = id,
         };
 
-    public static GetCategoryBySlugQuery GetBySLug(string slug = "slug")
+    public static GetCategoryBySlugQuery GetBySlug(string slug = "slug")
     => new GetCategoryBySlugQuery()
     {
         slug = slug,
     };
 
-    public static BlogCategoryResponse GetBySlug(string slug = "slug")
-        => new BlogCategoryResponse()
-        {
-            slug = slug,
-        };
+    //public static BlogCategoryResponse GetBySlug(string slug = "slug")
+    //    => new BlogCategoryResponse()
+    //    {
+    //        slug = slug,
+    //    };
 
 	public static BlogCategoryResponse GetOne(string slug = "slug", string name = "name")
 		=> new BlogCategoryResponse()
@@ -57,12 +68,12 @@ internal static class BlogCategoryDataProvider
 			description = "Tech Category"
 		};
 
-	public static GetPaginatedCategoryQuery GetByQueryFilter()
+	public static GetPaginatedCategoryQuery GetByQueryFilter(string searchTerm = "")
 	=> new GetPaginatedCategoryQuery()
 	{
 		Page = 1,
 		PageSize = 10,
-		SearchTerm = ""
+		SearchTerm = searchTerm,
 	};
 
 	public static PaginatedList<BlogCategory> GetPaginatedList()

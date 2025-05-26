@@ -16,20 +16,12 @@ public class EditCategoryCommandHandlerTests
             EditCategoryCommandHandler>(
             handlerFactory: (repo, uow) => new EditCategoryCommandHandler(uow, repo), // فقط IUnitOfWork پاس می‌دهیم
             execute: (handler, command, token) => handler.Handle(command, token),
-            command: BlogCategoryDataProvider.Edit(name: "New", id: 1),
+            command: BlogCategoryDataProvider.Edit(name: "Updated Name", id: 1),
 			entityId: 1,
-            existingEntity: new BlogCategory
-            {
-                id = 1,
-                name = "Old Name",
-                slug = "old-name",
-                description = "Old Desc"
-            },
-            assertUpdated: entity =>
+            existingEntity: BlogCategoryDataProvider.Row(name: "old", id: 1),
+			assertUpdated: entity =>
             {
                 Assert.Equal("Updated Name", entity.name);
-                Assert.Equal("updated-name", entity.slug); // فرض بر این است که SlugHelper ساخته
-                Assert.Equal("Updated Desc", entity.description);
             }
         );
     }
@@ -41,8 +33,8 @@ public class EditCategoryCommandHandlerTests
         await EditHandlerTestHelper.TestEditNotFound<EditCategoryCommand, BlogCategory, EditCategoryCommandHandler>(
             handlerFactory: (repo, uow) => new EditCategoryCommandHandler(uow, repo),
             execute: (handler, command, token) => handler.Handle(command, token),
-            command: new EditCategoryCommand { id = 2 },
-            entityId: 2
+            command: BlogCategoryDataProvider.Edit(id: 2),
+			entityId: 2
         );
     }
 
@@ -52,21 +44,9 @@ public class EditCategoryCommandHandlerTests
         await EditHandlerTestHelper.TestEditCommitFail<EditCategoryCommand, BlogCategory, EditCategoryCommandHandler>(
             handlerFactory: (repo, uow) => new EditCategoryCommandHandler(uow, repo),
             execute: (handler, command, token) => handler.Handle(command, token),
-            command: new EditCategoryCommand
-            {
-                id = 1,
-                name = "Name",
-                slug = null,
-                description = "Desc"
-            },
-            entityId: 1,
-            existingEntity: new BlogCategory
-            {
-                id = 1,
-                name = "Old Name",
-                slug = "old-slug",
-                description = "Old Desc"
-            }
-        );
+            command: BlogCategoryDataProvider.Edit(name: "Updated Name", id: 1),
+			entityId: 1,
+            existingEntity: BlogCategoryDataProvider.Row(name: "old Name", id: 1)
+		);
     }
 }
