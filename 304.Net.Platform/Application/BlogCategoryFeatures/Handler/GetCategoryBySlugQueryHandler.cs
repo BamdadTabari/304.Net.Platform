@@ -8,8 +8,7 @@ using MediatR;
 
 namespace _304.Net.Platform.Application.BlogCategoryFeatures.Handler;
 
-public class GetCategoryBySlugQueryHandler
-    : IRequestHandler<GetCategoryBySlugQuery, ResponseDto<BlogCategoryResponse>>
+public class GetCategoryBySlugQueryHandler : IRequestHandler<GetCategoryBySlugQuery, ResponseDto<BlogCategoryResponse>>
 {
     private readonly IUnitOfWork _unitOfWork;
     private readonly GetBySlugHandler _handler;
