@@ -1,5 +1,6 @@
 ﻿using Core.Base.Text;
 using DataLayer.Base.Response;
+using DataLayer.Base.Validator;
 using DataLayer.Repository;
 using Serilog;
 
@@ -13,21 +14,24 @@ public class CreateHandler
     }
 
     public async Task<ResponseDto<TResult>> HandleAsync<TResult>(
-        Func<Task<bool>>? isNameValid,
-        Func<Task<bool>> isSlugValid,
-        Func<Task<TResult>> onCreate,
-        string propertyName = "نام",
-        string slugProperty = "نامک",
+		List<ValidationItem>? validations,
+		Func<Task<TResult>> onCreate,
         string? createMessage = "عملیات موفق بود",
         CancellationToken cancellationToken = default)
     {
-        if (isNameValid != null && !await isNameValid())
-            return Responses.Exist<TResult>(default, null, propertyName);
+		if (validations != null)
+		{
+			foreach (var validation in validations)
+			{
+				var isValid = await validation.Rule();
+				if (isValid)
+				{
+					return Responses.Exist<TResult>(default, null, validation.Value);
+				}
+			}
+		}
 
-        if (await isSlugValid())
-            return Responses.Exist<TResult>(default, null, slugProperty);
-
-        try
+		try
         {
             var result = await onCreate();
             await _unitOfWork.CommitAsync(cancellationToken);
@@ -39,6 +43,6 @@ public class CreateHandler
             Log.Error(ex, "خطا در زمان ایجاد موجودیت: {Message}", ex.Message);
             return Responses.ExceptionFail<TResult>(default, null);
         }
-        }
+    }
     
 }

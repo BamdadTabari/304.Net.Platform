@@ -3,6 +3,7 @@ using Core.Assistant.Helpers;
 using Core.EntityFramework.Models;
 using DataLayer.Base.Handler;
 using DataLayer.Base.Response;
+using DataLayer.Base.Validator;
 using DataLayer.Repository;
 using DataLayer.Services;
 using MediatR;
@@ -37,10 +38,23 @@ public class EditBlogCommandHandler : IRequestHandler<EditBlogCommand, ResponseD
             request.image = result;
         }
 
-        return await _handler.HandleAsync(
+		var validations = new List<ValidationItem>
+		{
+		   new ()
+		   {
+			   Rule = async () => await _repository.ExistsAsync(x => x.name == request.name && x.id != request.id),
+			   Value = "نام"
+		   },
+		   new ()
+		   {
+			   Rule = async () => await _repository.ExistsAsync(x => x.slug == slug && x.id != request.id),
+			   Value = "نامک"
+		   }
+		};
+
+		return await _handler.HandleAsync(
            id: request.id,
-           isNameValid: async () => !await _repository.ExistsAsync(x => x.name == request.name),
-           isSlugValid: () => _repository.ExistsAsync(x => x.slug == slug),
+           validations: validations,
            propertyName: "مقاله",
            updateEntity: async entity =>
            {

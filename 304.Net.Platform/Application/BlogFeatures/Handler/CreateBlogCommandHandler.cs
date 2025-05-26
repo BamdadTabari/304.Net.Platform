@@ -4,6 +4,7 @@ using Core.EntityFramework.Models;
 using DataLayer.Base.Handler;
 using DataLayer.Base.Mapper;
 using DataLayer.Base.Response;
+using DataLayer.Base.Validator;
 using DataLayer.Repository;
 using MediatR;
 
@@ -35,10 +36,24 @@ public class CreateBlogCommandHandler : IRequestHandler<CreateBlogCommand, Respo
             return Responses.NotValid<string>(data:default ,propName: "تصویر شاخص");
         }
 
-        return await _handler.HandleAsync(
-           isNameValid: async () => !await _unitOfWork.BlogRepository.ExistsAsync(x => x.name == request.name),
-           isSlugValid: () => _unitOfWork.BlogRepository.ExistsAsync(x => x.slug == slug),
-           propertyName: "نام مقاله",
+		var validations = new List<ValidationItem>
+		{
+		   new ()
+		   {
+			   Rule = async () => await _unitOfWork.BlogRepository.ExistsAsync(x => x.name == request.name),
+			   Value = "نام"
+		   },
+		   new ()
+		   {
+			   Rule = async () => await _unitOfWork.BlogRepository.ExistsAsync(x => x.slug == slug),
+			   Value = "نامک"
+		   }
+
+		};
+
+
+		return await _handler.HandleAsync(
+           validations: validations,
            onCreate: async () =>
            {
                var entity = Mapper.Map<CreateBlogCommand, Blog>(request);

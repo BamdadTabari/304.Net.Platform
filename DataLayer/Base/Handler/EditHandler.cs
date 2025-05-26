@@ -1,5 +1,6 @@
 ﻿using Core.Base.EF;
 using DataLayer.Base.Response;
+using DataLayer.Base.Validator;
 using DataLayer.Repository;
 using Serilog;
 using System;
@@ -21,11 +22,10 @@ public class EditHandler<TCommand, TEntity>
 
     public async Task<ResponseDto<string>> HandleAsync(
         long id,
-        Func<Task<bool>>? isNameValid,
-        Func<Task<bool>> isSlugValid,
-        Func<TEntity, Task<string>> updateEntity,
+		List<ValidationItem>? validations,
+		Func<TEntity, Task<string>> updateEntity,
         string propertyName = "رکورد",
-        string slugProperty = "نامک",
+        
         CancellationToken cancellationToken = default
     )
     {
@@ -35,22 +35,22 @@ public class EditHandler<TCommand, TEntity>
 
             if (entity == null)
             {
-                return new ResponseDto<string>
-                {
-                    is_success = false,
-                    response_code = 404,
-                    message = $"{propertyName} پیدا نشد",
-                    data = null
-                };
+                return Responses.NotFound<string>(default,propertyName);
             }
 
-            if (isNameValid != null && !await isNameValid())
-                return Responses.Exist<string>(default, null, propertyName);
+			if (validations != null)
+			{
+				foreach (var validation in validations)
+				{
+					var isValid = await validation.Rule();
+					if (isValid)
+					{
+						return Responses.Exist<string>(default, null, validation.Value);
+					}
+				}
+			}
 
-            if (await isSlugValid())
-                return Responses.Exist<string>(default, null, slugProperty);
-
-            var result = await updateEntity(entity);
+			var result = await updateEntity(entity);
 
             var committed = await _unitOfWork.CommitAsync(cancellationToken);
 

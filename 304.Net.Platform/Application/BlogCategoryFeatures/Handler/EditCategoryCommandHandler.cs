@@ -4,6 +4,7 @@ using Core.EntityFramework.Models;
 using DataLayer.Base.Command;
 using DataLayer.Base.Handler;
 using DataLayer.Base.Response;
+using DataLayer.Base.Validator;
 using DataLayer.Repository;
 using MediatR;
 
@@ -27,14 +28,23 @@ public class EditCategoryCommandHandler : IRequestHandler<EditCategoryCommand, R
     {
         var slug = request.slug ?? SlugHelper.GenerateSlug(request.name);
 
-        return await _handler.HandleAsync(
+		var validations = new List<ValidationItem>
+		{
+		   new ()
+		   {
+			   Rule = async () => await _repository.ExistsAsync(x => x.name == request.name && x.id != request.id),
+			   Value = "نام"
+		   },
+		   new ()
+		   {
+			   Rule = async () => await _repository.ExistsAsync(x => x.slug == slug && x.id != request.id),
+			   Value = "نامک"
+		   }
+		};
+
+		return await _handler.HandleAsync(
             id: request.id,
-            isNameValid: async () =>
-                !await _repository.ExistsAsync(x => x.name == request.name && x.id != request.id),
-
-            isSlugValid: async () =>
-                await _repository.ExistsAsync(x => x.slug == slug && x.id != request.id),
-
+            validations: validations,
             updateEntity: async entity =>
             {
                 entity.name = request.name;

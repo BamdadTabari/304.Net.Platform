@@ -4,8 +4,10 @@ using Core.EntityFramework.Models;
 using DataLayer.Base.Handler;
 using DataLayer.Base.Mapper;
 using DataLayer.Base.Response;
+using DataLayer.Base.Validator;
 using DataLayer.Repository;
 using MediatR;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
 namespace _304.Net.Platform.Application.BlogCategoryFeatures.Handler;
 
 public class CreateCategoryCommandHandler : IRequestHandler<CreateCategoryCommand, ResponseDto<string>>
@@ -22,11 +24,22 @@ public class CreateCategoryCommandHandler : IRequestHandler<CreateCategoryComman
     public async Task<ResponseDto<string>> Handle(CreateCategoryCommand request, CancellationToken cancellationToken)
     {
         var slug = request.slug ?? SlugHelper.GenerateSlug(request.name);
+		var validations = new List<ValidationItem>
+        {
+	       new ()
+           {
+               Rule = async () => await _unitOfWork.BlogCategoryRepository.ExistsAsync(x => x.name == request.name),
+               Value = "نام"
+		   },
+           new ()
+           {
+               Rule = async () => await _unitOfWork.BlogCategoryRepository.ExistsAsync(x => x.slug == slug),
+               Value = "نامک"
+		   }
 
-        return await _handler.HandleAsync(
-            isNameValid: async () => !await _unitOfWork.BlogCategoryRepository.ExistsAsync(x => x.name == request.name),
-            isSlugValid: () => _unitOfWork.BlogCategoryRepository.ExistsAsync(x => x.slug == slug),
-            propertyName: "نام دسته‌بندی",
+        };
+		return await _handler.HandleAsync(
+            validations: validations,
             onCreate: async () =>
             {
                 var entity = Mapper.Map<CreateCategoryCommand, BlogCategory>(request);
