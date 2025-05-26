@@ -24,7 +24,7 @@ public class GetBlogBySlugQueryHandler : IRequestHandler<GetBlogBySlugQuery, Res
 	public async Task<ResponseDto<BlogResponse>> Handle(GetBlogBySlugQuery request, CancellationToken cancellationToken)
 	{
 		return await _handler.Handle<Blog, BlogResponse>(
-			async uow => await uow.BlogRepository.FindSingle(x => x.slug == request.slug, includes: ["blog_category"]),
+			async uow => await uow.BlogRepository.FindSingle(x => x.slug == request.slug, "blog_category"),
 			"دسته‌بندی",
 			null
 		);

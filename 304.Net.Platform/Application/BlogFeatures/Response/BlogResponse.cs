@@ -1,9 +1,10 @@
 ﻿using _304.Net.Platform.Application.BlogCategoryFeatures.Response;
 using Core.EntityFramework.Models;
+using DataLayer.Base.Response;
 
 namespace _304.Net.Platform.Application.BlogFeatures.Response;
 
-public class BlogResponse
+public class BlogResponse : BaseResponse
 {
 	public string description { get; set; }
 	public string image { get; set; }
