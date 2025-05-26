@@ -19,7 +19,7 @@ public class DeleteHandler
 		Action<TEntity> onDelete,
 		string? name = "آیتم",
 		string? notFoundMessage = "آیتم مورد نظر پیدا نشد",
-		string successMessage = "آیتم با موفقیت حذف شد",
+		string? successMessage = "آیتم با موفقیت حذف شد",
 		int successCode = 200,
 		CancellationToken cancellationToken = default)
 		where TEntity : class
