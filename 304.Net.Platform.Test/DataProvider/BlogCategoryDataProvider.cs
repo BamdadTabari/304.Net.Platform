@@ -53,12 +53,6 @@ public static class BlogCategoryDataProvider
         slug = slug,
     };
 
-    //public static BlogCategoryResponse GetBySlug(string slug = "slug")
-    //    => new BlogCategoryResponse()
-    //    {
-    //        slug = slug,
-    //    };
-
 	public static BlogCategoryResponse GetOne(string slug = "slug", string name = "name")
 		=> new BlogCategoryResponse()
 		{

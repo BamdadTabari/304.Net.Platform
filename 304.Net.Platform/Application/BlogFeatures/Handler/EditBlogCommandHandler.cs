@@ -15,16 +15,16 @@ public class EditBlogCommandHandler : IRequestHandler<EditBlogCommand, ResponseD
     private readonly EditHandler<EditBlogCommand,Blog> _handler;
     private readonly IUnitOfWork _unitOfWork;
     private readonly IRepository<Blog> _repository;
-    public EditBlogCommandHandler(IUnitOfWork unitOfWork, IBlogRepository blogRepository, IRepository<Blog> repository)
+    public EditBlogCommandHandler(IUnitOfWork unitOfWork, IRepository<Blog> repository)
     {
         _unitOfWork = unitOfWork;
-        _handler = new EditHandler<EditBlogCommand, Blog>(unitOfWork, blogRepository);
+        _handler = new EditHandler<EditBlogCommand, Blog>(unitOfWork, repository);
         _repository = repository;
     }
 
     public async Task<ResponseDto<string>> Handle(EditBlogCommand request, CancellationToken cancellationToken)
     {
-        var entity = await _unitOfWork.BlogRepository.FindSingle(x => x.id == request.id);
+        var entity = await _repository.FindSingle(x => x.id == request.id);
         if (entity == null)
             return Responses.NotFound<string>(default, "مقاله");
 
