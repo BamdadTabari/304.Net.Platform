@@ -40,7 +40,8 @@ public class CreateBlogCommandHandlerTests
     [Fact]
     public async Task Handle_ShouldFail_WhenNameIsDuplicate()
     {
-        await CreateHandlerTestHelper.TestCreateFailure<
+		var file = Files.CreateFakeFormFile();
+		await CreateHandlerTestHelper.TestCreateFailure<
             CreateBlogCommand,
             Blog,
             IBlogRepository,
@@ -48,7 +49,7 @@ public class CreateBlogCommandHandlerTests
         >(
             handlerFactory: uow => new CreateBlogCommandHandler(uow),
             execute: (handler, cmd, ct) => handler.Handle(cmd, ct),
-            command: new CreateBlogCommand { name = "Duplicate Name", slug = null },
+            command: new CreateBlogCommand { name = "Duplicate Name", slug = null , image_file =file },
             repoSelector: uow => uow.BlogRepository,
             setupRepoMock: repo =>
             {
@@ -64,7 +65,8 @@ public class CreateBlogCommandHandlerTests
     [Fact]
     public async Task Handle_ShouldFail_WhenSlugIsDuplicate()
     {
-        await CreateHandlerTestHelper.TestCreateFailure<
+		var file = Files.CreateFakeFormFile();
+		await CreateHandlerTestHelper.TestCreateFailure<
             CreateBlogCommand,
             Blog,
             IBlogRepository,
@@ -72,7 +74,7 @@ public class CreateBlogCommandHandlerTests
         >(
             handlerFactory: uow => new CreateBlogCommandHandler(uow),
             execute: (handler, cmd, ct) => handler.Handle(cmd, ct),
-            command: new CreateBlogCommand { name = "Test Name", slug = "duplicate-slug" },
+            command: new CreateBlogCommand { name = "Test Name", slug = "duplicate-slug" , image_file = file},
             repoSelector: uow => uow.BlogRepository,
             setupRepoMock: repo =>
             {
@@ -89,10 +91,11 @@ public class CreateBlogCommandHandlerTests
     [Fact]
     public async Task Handle_ShouldReturnError_WhenExceptionThrown()
     {
-        // Arrange
-        var command = new CreateBlogCommand { name = "Tech" };
-
-        await CreateHandlerTestHelper.TestCreateException<
+		var file = Files.CreateFakeFormFile();
+		// Arrange
+		var command = new CreateBlogCommand { name = "Tech" , image_file = file};
+		
+		await CreateHandlerTestHelper.TestCreateException<
             CreateBlogCommand,
             Blog,
             IBlogRepository,
@@ -118,4 +121,35 @@ public class CreateBlogCommandHandlerTests
             }
         );
     }
+
+	[Fact]
+	public async Task Handle_ShouldFail_WhenImageFileIsNull()
+	{
+		await CreateHandlerTestHelper.TestCreateFailure<
+			CreateBlogCommand,
+			Blog,
+			IBlogRepository,
+			CreateBlogCommandHandler
+		>(
+			handlerFactory: uow => new CreateBlogCommandHandler(uow),
+
+			execute: (handler, cmd, ct) => handler.Handle(cmd, ct),
+
+			command: new CreateBlogCommand
+			{
+				name = "Blog Without Image",
+				slug = null,
+				image_file = null // 🔴 عمداً فایل نذاشتیم
+			},
+
+			repoSelector: uow => uow.BlogRepository,
+
+			setupRepoMock: repo =>
+			{
+				// حتی نیاز نیست چیزی ستاپ کنیم چون کد قبل از رسیدن به validation ها return می‌کنه
+			},
+
+			expectedMessage: "تصویر شاخص"
+		);
+	}
 }

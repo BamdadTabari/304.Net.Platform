@@ -86,7 +86,7 @@ public static class Responses
         return new ResponseDto<T>
         {
             data = data,
-            is_success = true,
+            is_success = false,
             message = message ?? Messages.Validate(propName),
             response_code = code
         };
