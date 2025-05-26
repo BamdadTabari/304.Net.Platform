@@ -25,7 +25,7 @@ public class GetBlogBySlugQueryHandlerTests
 				(handler, token) => handler.Handle(BlogDataProvider.GetBySlug("slug"), token),
 				uow => uow.BlogRepository,
 				blog,
-				include: "blog_category" 
+				includes: new[] { "blog_category" } // 👈 حتماً اگر هندلر include داره، اینجا هم بدی
 		);
 	}
 

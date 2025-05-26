@@ -25,7 +25,7 @@ public class GetBlogBySlugQueryHandler : IRequestHandler<GetBlogBySlugQuery, Res
 	{
 		return await _handler.Handle<Blog, BlogResponse>(
 			async uow => await uow.BlogRepository.FindSingle(x => x.slug == request.slug, "blog_category"),
-			"دسته‌بندی",
+			"مقاله",
 			null
 		);
 	}

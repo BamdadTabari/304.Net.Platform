@@ -12,35 +12,38 @@ using System.Linq.Expressions;
 namespace _304.Net.Platform.Test.GenericHandlers;
 public static class GetPaginatedHandlerTestHelper
 {
-    public static async Task TestPaginated_Success<TEntity, TRepository, THandler, TQuery>(
-        Func<IUnitOfWork, THandler> handlerFactory,
-        Func<THandler, TQuery, CancellationToken, Task<ResponseDto<PaginatedList<TEntity>>>> execute,
-        Expression<Func<IUnitOfWork, TRepository>> repoSelector,
-        TQuery query,
-        PaginatedList<TEntity> expectedList)
-        where TEntity : class, IBaseEntity
-        where TRepository : class, IRepository<TEntity>
-        where THandler : class
-    {
-        var unitOfWorkMock = new Mock<IUnitOfWork>();
-        var repoMock = new Mock<TRepository>();
+	public static async Task TestPaginated_Success<TEntity, TRepository, THandler, TQuery>(
+	Func<IUnitOfWork, THandler> handlerFactory,
+	Func<THandler, TQuery, CancellationToken, Task<ResponseDto<PaginatedList<TEntity>>>> execute,
+	Expression<Func<IUnitOfWork, TRepository>> repoSelector,
+	TQuery query,
+	PaginatedList<TEntity> expectedList,
+	string[]? includes = null
+)
+	where TEntity : class, IBaseEntity
+	where TRepository : class, IRepository<TEntity>
+	where THandler : class
+	{
+		var unitOfWorkMock = new Mock<IUnitOfWork>();
+		var repoMock = new Mock<TRepository>();
 
-        unitOfWorkMock.Setup(repoSelector).Returns(repoMock.Object);
+		unitOfWorkMock.Setup(repoSelector).Returns(repoMock.Object);
 
-        repoMock.Setup(r => r.GetPagedResultAsync(
-            It.IsAny<DefaultPaginationFilter>(),
-            It.IsAny<Expression<Func<TEntity, bool>>>(),
-            It.IsAny<string[]>()
-        )).ReturnsAsync(expectedList);
+		var includesToUse = includes ?? Array.Empty<string>();
 
-        var handler = handlerFactory(unitOfWorkMock.Object);
-        var result = await execute(handler, query, CancellationToken.None);
+		repoMock.Setup(r => r.GetPagedResultAsync(
+			It.IsAny<DefaultPaginationFilter>(),
+			It.IsAny<Expression<Func<TEntity, bool>>>(),
+			It.Is<string[]>(i => i.SequenceEqual(includesToUse))
+		)).ReturnsAsync(expectedList);
 
-        Assert.True(result.is_success);
-        Assert.NotNull(result.data);
-        Assert.Equal(expectedList.Data.Count, result.data.Data.Count);
-    }
+		var handler = handlerFactory(unitOfWorkMock.Object);
+		var result = await execute(handler, query, CancellationToken.None);
 
+		Assert.True(result.is_success);
+		Assert.NotNull(result.data);
+		Assert.Equal(expectedList.Data.Count, result.data.Data.Count);
+	}
 }
 
 

@@ -15,7 +15,7 @@ public static class GetBySlugHandlerTestHelper
 	Func<THandler, CancellationToken, Task<ResponseDto<TDto>>> execute,
 	Expression<Func<IUnitOfWork, TRepository>> repoSelector,
 	TEntity entity,
-	string? include = null
+	string[]? includes = null
 )
 	where TEntity : class, IBaseEntity
 	where TDto : class, new()
@@ -27,9 +27,13 @@ public static class GetBySlugHandlerTestHelper
 
 		unitOfWorkMock.Setup(repoSelector).Returns(repoMock.Object);
 
-		// پشتیبانی از include (در صورتی که در هندلر استفاده شده باشه)
+		var includesToUse = includes ?? Array.Empty<string>();
+
 		repoMock.Setup(r =>
-			r.FindSingle(It.IsAny<Expression<Func<TEntity, bool>>>(), include)
+			r.FindSingle(
+				It.IsAny<Expression<Func<TEntity, bool>>>(),
+				It.Is<string[]>(inc => inc.SequenceEqual(includesToUse))
+			)
 		).ReturnsAsync(entity);
 
 		var handler = handlerFactory(unitOfWorkMock.Object);
@@ -38,6 +42,7 @@ public static class GetBySlugHandlerTestHelper
 		Assert.True(result.is_success);
 		Assert.NotNull(result.data);
 	}
+
 
 
 	public static async Task TestGetBySlug_NotFound<TEntity, TDto, TRepository, THandler>(

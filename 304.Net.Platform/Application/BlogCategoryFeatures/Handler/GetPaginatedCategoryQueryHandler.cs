@@ -8,8 +8,7 @@ using MediatR;
 
 namespace _304.Net.Platform.Application.BlogCategoryFeatures.Handler;
 
-public class GetPaginatedCategoryQueryHandler
-    : IRequestHandler<GetPaginatedCategoryQuery, ResponseDto<PaginatedList<BlogCategory>>>
+public class GetPaginatedCategoryQueryHandler : IRequestHandler<GetPaginatedCategoryQuery, ResponseDto<PaginatedList<BlogCategory>>>
 {
     private readonly IUnitOfWork _unitOfWork;
     private readonly GetPaginatedHandler _handler;
