@@ -1,36 +1,60 @@
 ﻿using System.Security.Cryptography;
 
 namespace Core.Assistant.Generators;
+
+// کلاس ایستا برای هش کردن رمز عبور و بررسی اعتبار آن
 public static class PasswordHasher
 {
-    private const int SaltSize = 16; // 128 bit
-    private const int KeySize = 32;  // 256 bit
-    private const int Iterations = 10000;
-    private static readonly HashAlgorithmName HashAlgorithm = HashAlgorithmName.SHA512;
+	// اندازه نمک (Salt) به بایت - ۱۶ بایت معادل ۱۲۸ بیت
+	private const int SaltSize = 16;
 
-    public static string Hash(string password)
-    {
-        using var algorithm = new Rfc2898DeriveBytes(password, SaltSize, Iterations, HashAlgorithm);
-        var key = Convert.ToBase64String(algorithm.GetBytes(KeySize));
-        var salt = Convert.ToBase64String(algorithm.Salt);
+	// اندازه کلید مشتق‌شده (هش) به بایت - ۳۲ بایت معادل ۲۵۶ بیت
+	private const int KeySize = 32;
 
-        return $"{key}.{salt}";
-    }
+	// تعداد تکرار الگوریتم مشتق‌سازی برای تقویت امنیت
+	private const int Iterations = 10000;
 
-    public static bool Check(string hash, string password)
-    {
-        if (string.IsNullOrWhiteSpace(hash)) return false;
+	// الگوریتم هش مورد استفاده (SHA512)
+	private static readonly HashAlgorithmName HashAlgorithm = HashAlgorithmName.SHA512;
 
-        var parts = hash.Split('.', 2);
-        if (parts.Length != 2)
-            throw new FormatException("Unexpected hash format. Should be formatted as 'key.salt'");
+	// متد برای هش کردن رمز عبور
+	public static string Hash(string password)
+	{
+		// ایجاد نمونه از Rfc2898DeriveBytes با رمز، اندازه نمک، تعداد تکرار و الگوریتم
+		using var algorithm = new Rfc2898DeriveBytes(password, SaltSize, Iterations, HashAlgorithm);
 
-        var key = Convert.FromBase64String(parts[0]);
-        var salt = Convert.FromBase64String(parts[1]);
+		// استخراج کلید مشتق‌شده (هش نهایی) و تبدیل به Base64
+		var key = Convert.ToBase64String(algorithm.GetBytes(KeySize));
 
-        using var algorithm = new Rfc2898DeriveBytes(password, salt, Iterations, HashAlgorithm);
-        var keyToCheck = algorithm.GetBytes(KeySize);
+		// استخراج نمک تولید شده و تبدیل به Base64
+		var salt = Convert.ToBase64String(algorithm.Salt);
 
-        return CryptographicOperations.FixedTimeEquals(key, keyToCheck);
-    }
+		// بازگرداندن کلید و نمک به صورت رشته‌ای با نقطه جدا شده
+		return $"{key}.{salt}";
+	}
+
+	// متد بررسی رمز عبور با استفاده از هش ذخیره شده
+	public static bool Check(string hash, string password)
+	{
+		// اگر هش خالی یا نال باشد، بازگرداندن false
+		if (string.IsNullOrWhiteSpace(hash)) return false;
+
+		// جدا کردن رشته هش به دو بخش: کلید و نمک
+		var parts = hash.Split('.', 2);
+		if (parts.Length != 2)
+			throw new FormatException("فرمت هش نامعتبر است. باید به صورت 'key.salt' باشد.");
+
+		// تبدیل کلید و نمک از Base64 به بایت آرایه
+		var key = Convert.FromBase64String(parts[0]);
+		var salt = Convert.FromBase64String(parts[1]);
+
+		// ایجاد نمونه جدید از Rfc2898DeriveBytes با رمز عبور و نمک بازیابی‌شده
+		using var algorithm = new Rfc2898DeriveBytes(password, salt, Iterations, HashAlgorithm);
+
+		// استخراج کلید مشتق‌شده جدید برای مقایسه
+		var keyToCheck = algorithm.GetBytes(KeySize);
+
+		// مقایسه دو کلید به صورت زمان-ثابت برای جلوگیری از حمله زمان‌سنجی
+		return CryptographicOperations.FixedTimeEquals(key, keyToCheck);
+	}
 }

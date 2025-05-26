@@ -1,19 +1,45 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
 namespace Core.Base.EF;
+
+/// <summary>
+/// کلاس پایه‌ای برای تمام موجودیت‌های (Entity) دیتابیس
+/// این کلاس شامل ویژگی‌های مشترک مانند شناسه، زمان ایجاد، زمان به‌روزرسانی، نام و اسلاگ است
+/// </summary>
 public class BaseEntity : IBaseEntity
 {
-    public long id { get; set; }
-    public DateTime created_at { get; set; }
-    public DateTime updated_at { get; set; }
-    public string? name { get; set; }
+	/// <summary>
+	/// شناسه یکتای رکورد (Primary Key)
+	/// </summary>
+	public long id { get; set; }
 
-    [MaxLength(1000)]
-    public string slug { get; set; }
+	/// <summary>
+	/// زمان ایجاد رکورد 
+	/// </summary>
+	public DateTime created_at { get; set; }
 
-    public BaseEntity()
-    {
-        created_at = DateTime.UtcNow;
-        updated_at = DateTime.UtcNow;
-    }
+	/// <summary>
+	/// زمان آخرین به‌روزرسانی رکورد 
+	/// </summary>
+	public DateTime updated_at { get; set; }
+
+	/// <summary>
+	/// نام اختیاری موجودیت
+	/// </summary>
+	public string? name { get; set; }
+
+	/// <summary>
+	/// اسلاگ (slug) یکتا برای موجودیت، معمولاً برای URLها یا لینک‌سازی استفاده می‌شود
+	/// </summary>
+	[MaxLength(1000)]
+	public string slug { get; set; }
+
+	/// <summary>
+	/// سازنده پیش‌فرض که تاریخ‌های ایجاد و به‌روزرسانی را تنظیم می‌کند
+	/// </summary>
+	public BaseEntity()
+	{
+		created_at = DateTime.Now;
+		updated_at = DateTime.Now;
+	}
 }
