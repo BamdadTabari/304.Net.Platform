@@ -37,7 +37,7 @@ public static class Responses
 		};
 	}
 
-	public static ResponseDto<T> NotFound<T>(T data, string? name = null, string? message = null)
+	public static ResponseDto<T> NotFound<T>(T? data, string? name = null, string? message = null)
 	{
 		return new ResponseDto<T>
 		{
