@@ -24,19 +24,8 @@ public class EditBlogCommandHandler : IRequestHandler<EditBlogCommand, ResponseD
 
     public async Task<ResponseDto<string>> Handle(EditBlogCommand request, CancellationToken cancellationToken)
     {
-        var entity = await _repository.FindSingle(x => x.id == request.id);
-        if (entity == null)
-            return Responses.NotFound<string>(default, "مقاله");
 
         var slug = request.slug ?? SlugHelper.GenerateSlug(request.name);
-
-        request.image = entity.image;
-        if (request.image_file != null)
-        {
-            FileHelper.DeleteImage(entity.image);
-            var result = await FileHelper.UploadImage(request.image_file);
-            request.image = result;
-        }
 
 		var validations = new List<ValidationItem>
 		{
@@ -53,26 +42,40 @@ public class EditBlogCommandHandler : IRequestHandler<EditBlogCommand, ResponseD
 		};
 
 		return await _handler.HandleAsync(
-           id: request.id,
-           validations: validations,
-           propertyName: "مقاله",
-           updateEntity: async entity =>
-           {
-               entity.name = request.name;
-               entity.slug = slug;
-               entity.updated_at = request.updated_at;
-               entity.description = request.description ?? "";
-               entity.meta_description = request.meta_description;
-               entity.blog_text = request.blog_text;
-               entity.estimated_read_time = request.estimated_read_time;
-               entity.blog_category_id = request.blog_category_id;
-               entity.image = request.image;
-               entity.keywords = request.keywords;
-               entity.show_blog = request.show_blog;
-               return slug;
-           },
-           cancellationToken: cancellationToken
-       );
-    }
+			id: request.id,
+			validations: validations,
+			propertyName: "مقاله",
+			beforeUpdate: async entity =>
+			{
+				// داینامیک مدیریت تصویر
+				request.image = entity.image;
+				if (request.image_file != null && request.image_file.Length > 0)
+				{
+					if (!string.IsNullOrEmpty(entity.image))
+						FileHelper.DeleteImage(entity.image);
+
+					var result = await FileHelper.UploadImage(request.image_file);
+					if (!string.IsNullOrEmpty(result))
+						request.image = result;
+				}
+			},
+			updateEntity: async entity =>
+			{
+				entity.name = request.name;
+				entity.slug = slug;
+				entity.updated_at = request.updated_at;
+				entity.description = request.description ?? "";
+				entity.meta_description = request.meta_description;
+				entity.blog_text = request.blog_text;
+				entity.estimated_read_time = request.estimated_read_time;
+				entity.blog_category_id = request.blog_category_id;
+				entity.image = request.image;
+				entity.keywords = request.keywords;
+				entity.show_blog = request.show_blog;
+				return slug;
+			},
+			cancellationToken: cancellationToken
+		);
+	}
 }
 
