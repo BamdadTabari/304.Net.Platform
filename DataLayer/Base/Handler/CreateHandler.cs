@@ -20,12 +20,12 @@ public class CreateHandler
 		Func<Task<bool>> isNameValid,
 		Func<Task<bool>> isSlugValid,
 		Func<Task<TResult>> onCreate,
-		string nameProperty = "نام",
+		string propertyName = "نام",
 		string slugProperty = "نامک",
 		CancellationToken cancellationToken = default)
 	{
 		if (!await isNameValid())
-			return Responses.Exist<TResult>(default, null, nameProperty);
+			return Responses.Exist<TResult>(default, null, propertyName);
 
 		if (await isSlugValid())
 			return Responses.Exist<TResult>(default, null, slugProperty);
