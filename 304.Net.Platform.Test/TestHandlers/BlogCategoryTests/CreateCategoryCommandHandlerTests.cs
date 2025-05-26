@@ -1,5 +1,6 @@
 ﻿using _304.Net.Platform.Application.BlogCategoryFeatures.Command;
 using _304.Net.Platform.Application.BlogCategoryFeatures.Handler;
+using _304.Net.Platform.Test.DataProvider;
 using _304.Net.Platform.Test.GenericHandlers;
 using Core.EntityFramework.Models;
 using DataLayer.Repository;
@@ -21,7 +22,7 @@ public class CreateCategoryCommandHandlerTests
         >(
             handlerFactory: uow => new CreateCategoryCommandHandler(uow),
             execute: (handler, cmd, ct) => handler.Handle(cmd, ct),
-            command: new CreateCategoryCommand { name = "Test Category", slug = null },
+            command: BlogCategoryDataProvider.Create(),
             repoSelector: uow => uow.BlogCategoryRepository
         );
     }
@@ -37,7 +38,7 @@ public class CreateCategoryCommandHandlerTests
         >(
             handlerFactory: uow => new CreateCategoryCommandHandler(uow),
             execute: (handler, cmd, ct) => handler.Handle(cmd, ct),
-            command: new CreateCategoryCommand { name = "Duplicate Name", slug = null },
+            command: BlogCategoryDataProvider.Create(name: "Duplicated Name"),
             repoSelector: uow => uow.BlogCategoryRepository,
             setupRepoMock: repo =>
             {

@@ -1,5 +1,6 @@
 ﻿using _304.Net.Platform.Application.BlogCategoryFeatures.Command;
 using _304.Net.Platform.Application.BlogCategoryFeatures.Handler;
+using _304.Net.Platform.Test.DataProvider;
 using _304.Net.Platform.Test.GenericHandlers;
 using Core.EntityFramework.Models;
 using DataLayer.Services;
@@ -15,15 +16,8 @@ public class EditCategoryCommandHandlerTests
             EditCategoryCommandHandler>(
             handlerFactory: (repo, uow) => new EditCategoryCommandHandler(uow, repo), // فقط IUnitOfWork پاس می‌دهیم
             execute: (handler, command, token) => handler.Handle(command, token),
-            command: new EditCategoryCommand
-            {
-                id = 1,
-                name = "Updated Name",
-                slug = null,
-                description = "Updated Desc",
-                updated_at = DateTime.UtcNow
-            },
-            entityId: 1,
+            command: BlogCategoryDataProvider.Edit(name: "New", id: 1),
+			entityId: 1,
             existingEntity: new BlogCategory
             {
                 id = 1,

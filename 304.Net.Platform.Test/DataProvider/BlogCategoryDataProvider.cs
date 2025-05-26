@@ -1,6 +1,8 @@
 ﻿using _304.Net.Platform.Application.BlogCategoryFeatures.Command;
 using _304.Net.Platform.Application.BlogCategoryFeatures.Query;
 using _304.Net.Platform.Application.BlogCategoryFeatures.Response;
+using Core.EntityFramework.Models;
+using Core.Pagination;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -40,9 +42,34 @@ internal static class BlogCategoryDataProvider
         slug = slug,
     };
 
-    public static BlogCategoryResponse GetOne(string slug = "slug")
+    public static BlogCategoryResponse GetBySlug(string slug = "slug")
         => new BlogCategoryResponse()
         {
             slug = slug,
         };
+
+	public static BlogCategoryResponse GetOne(string slug = "slug", string name = "name")
+		=> new BlogCategoryResponse()
+		{
+			id = 1,
+			name = name,
+			slug = slug,
+			description = "Tech Category"
+		};
+
+	public static GetPaginatedCategoryQuery GetByQueryFilter()
+	=> new GetPaginatedCategoryQuery()
+	{
+		Page = 1,
+		PageSize = 10,
+		SearchTerm = ""
+	};
+
+	public static PaginatedList<BlogCategory> GetPaginatedList()
+	=> new PaginatedList<BlogCategory>(new List<BlogCategory>
+		{
+			new BlogCategory { id = 1, name = "Tech" },
+			new BlogCategory { id = 2, name = "Health" }
+		}
+    , count: 2, page: 1, pageSize: 10);
 }

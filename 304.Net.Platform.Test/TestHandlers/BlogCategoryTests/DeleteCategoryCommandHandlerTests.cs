@@ -1,5 +1,6 @@
 ﻿using _304.Net.Platform.Application.BlogCategoryFeatures.Command;
 using _304.Net.Platform.Application.BlogCategoryFeatures.Handler;
+using _304.Net.Platform.Test.DataProvider;
 using _304.Net.Platform.Test.GenericHandlers;
 using Core.EntityFramework.Models;
 using DataLayer.Services;
@@ -10,7 +11,7 @@ public class DeleteCategoryCommandHandlerTests
     [Fact]
     public async Task Handle_ShouldDeleteCategory_WhenExists()
     {
-        var command = new DeleteCategoryCommand { id = 1 };
+        var command = BlogCategoryDataProvider.Delete();
 
         await DeleteHandlerTestHelper.TestDelete<
             DeleteCategoryCommand,
@@ -27,7 +28,7 @@ public class DeleteCategoryCommandHandlerTests
     [Fact]
     public async Task Handle_ShouldReturnNotFound_WhenCategoryDoesNotExist()
     {
-        var command = new DeleteCategoryCommand { id = 99 };
+        var command = BlogCategoryDataProvider.Delete(id: 99);
 
         await DeleteHandlerTestHelper.TestDeleteNotFound<
             DeleteCategoryCommand,
