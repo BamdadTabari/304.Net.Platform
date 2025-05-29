@@ -17,7 +17,7 @@ public static class SortExtensions
             SortByEnum.slug_descending => query.OrderByDescending(x => x.slug),
             SortByEnum.name => query.OrderBy(x => x.name),
             SortByEnum.name_descending => query.OrderByDescending(x => x.name),
-            _ => query.OrderByDescending(x => x.created_at)
+            _ => query.OrderByDescending(x => x.id)
         };
     }
 }

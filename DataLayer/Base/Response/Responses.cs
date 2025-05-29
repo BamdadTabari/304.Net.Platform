@@ -15,7 +15,7 @@ public static class Responses
         };
     }
 
-    public static ResponseDto<T> Fail<T>(T? data = default, string? message = null, int code = 400)
+    public static ResponseDto<T> Fail<T>(T? data = default, string? message = null, int code = 500)
     {
         return new ResponseDto<T>
         {

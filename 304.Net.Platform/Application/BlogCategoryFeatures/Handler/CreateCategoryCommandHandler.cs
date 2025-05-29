@@ -24,23 +24,15 @@ public class CreateCategoryCommandHandler : IRequestHandler<CreateCategoryComman
         var slug = request.slug ?? SlugHelper.GenerateSlug(request.name);
 
         return await _handler.HandleAsync(
-            isNameValid: () => _unitOfWork.BlogCategoryRepository
-                .ExistsAsync(x => x.name == request.name)
-                .ContinueWith(t => !t.Result),
-
-            isSlugValid: () => _unitOfWork.BlogCategoryRepository
-                .ExistsAsync(x => x.slug == slug),
-
+            isNameValid: async () => !await _unitOfWork.BlogCategoryRepository.ExistsAsync(x => x.name == request.name),
+            isSlugValid: () => _unitOfWork.BlogCategoryRepository.ExistsAsync(x => x.slug == slug),
             propertyName: "نام دسته‌بندی",
-
             onCreate: async () =>
             {
                 var entity = Mapper.Map<CreateCategoryCommand, BlogCategory>(request);
-
                 await _unitOfWork.BlogCategoryRepository.AddAsync(entity);
                 return slug;
             },
-
             cancellationToken: cancellationToken
         );
     }
