@@ -15,6 +15,17 @@ public static class Responses
         };
     }
 
+    public static ResponseDto<T> ChangeOrDelete<T>(T? data = default, string? message = null, int code = 204)
+    {
+        return new ResponseDto<T>
+        {
+            data = data,
+            is_success = true,
+            message = message ?? Messages.Success(),
+            response_code = code
+        };
+    }
+
     public static ResponseDto<T> Fail<T>(T? data = default, string? message = null, int code = 500)
     {
         return new ResponseDto<T>

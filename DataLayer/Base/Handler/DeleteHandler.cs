@@ -17,7 +17,7 @@ public class DeleteHandler
         string? name = "آیتم",
         string? notFoundMessage = "آیتم مورد نظر پیدا نشد",
         string? successMessage = "آیتم با موفقیت حذف شد",
-        int successCode = 200,
+        int successCode = 204,
         CancellationToken cancellationToken = default)
         where TEntity : class
     {
@@ -30,7 +30,7 @@ public class DeleteHandler
             onDelete(entity);
             await _unitOfWork.CommitAsync(cancellationToken);
 
-            return Responses.Success<TResult>(default, successMessage, successCode);
+            return Responses.ChangeOrDelete<TResult>(default, successMessage, successCode);
         }
         catch (Exception ex)
         {
