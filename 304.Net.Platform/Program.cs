@@ -8,9 +8,9 @@ builder.Services.AddControllers();
 
 // configs
 builder.Services.Configure<LockoutConfig>(
-	builder.Configuration.GetSection(LockoutConfig.SectionName));
+    builder.Configuration.GetSection(LockoutConfig.SectionName));
 builder.Services.Configure<SecurityTokenConfig>(
-	builder.Configuration.GetSection(SecurityTokenConfig.SectionName));
+    builder.Configuration.GetSection(SecurityTokenConfig.SectionName));
 
 var app = builder.Build();
 
