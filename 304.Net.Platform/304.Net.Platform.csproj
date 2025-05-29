@@ -22,8 +22,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Application\BlogCategoryFeatures\Query\" />
-    <Folder Include="Application\BlogCategoryFeatures\Response\" />
     <Folder Include="Controllers\" />
   </ItemGroup>
 

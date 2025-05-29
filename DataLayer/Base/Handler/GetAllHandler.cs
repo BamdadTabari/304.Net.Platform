@@ -12,13 +12,12 @@ public class GetAllHandler
     }
 
     public ResponseDto<List<TDto>> Handle<TEntity, TDto>(
-        Func<IQueryable<TEntity>> getEntities)
+        List<TEntity> entities)
         where TEntity : class
         where TDto : class, new()
     {
         try
         {
-            var entities = getEntities().ToList();
             var dtoList = Mapper.Mapper.Map<List<TEntity>, List<TDto>>(entities);
 
             return Responses.Data(dtoList);
