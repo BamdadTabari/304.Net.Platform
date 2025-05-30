@@ -12,14 +12,13 @@ public class GetPaginatedHandler
         _unitOfWork = unitOfWork;
     }
 
-    public ResponseDto<PaginatedList<TEntity>> Handle<TEntity>(
-        Func<IUnitOfWork, PaginatedList<TEntity>> getRepo,
-        DefaultPaginationFilter filter)
+    public async Task<ResponseDto<PaginatedList<TEntity>>> Handle<TEntity>(
+        Func<IUnitOfWork, Task<PaginatedList<TEntity>>> getRepo)
         where TEntity : class
     {
         try
         {
-            var result = getRepo(_unitOfWork);
+            var result = await getRepo(_unitOfWork);
             return Responses.Data(result);
         }
         catch (Exception ex)
