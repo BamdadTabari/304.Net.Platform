@@ -13,11 +13,9 @@ public class EditBlogCommandHandler : IRequestHandler<EditBlogCommand, ResponseD
 {
     private readonly EditHandler<EditBlogCommand,Blog> _handler;
     private readonly IUnitOfWork _unitOfWork;
-    private readonly IBlogRepository _repository;
     public EditBlogCommandHandler(IUnitOfWork unitOfWork, IBlogRepository blogRepository)
     {
         _unitOfWork = unitOfWork;
-        _repository = blogRepository;
         _handler = new EditHandler<EditBlogCommand, Blog>(unitOfWork,blogRepository);
     }
 
@@ -25,12 +23,15 @@ public class EditBlogCommandHandler : IRequestHandler<EditBlogCommand, ResponseD
     {
 
         var slug = request.slug ?? SlugHelper.GenerateSlug(request.name);
-
+        var entity = await _unitOfWork.BlogRepository.FindSingle(x => x.id == request.id);
+        request.image = entity.image;
         if (request.image_file != null)
         {
             // Define the directory for uploads 
             var uploadPath = Path.Combine(Directory.GetCurrentDirectory(), "images");
-
+            
+            if (entity != null && File.Exists(entity.image))
+                File.Delete(entity.image);
             // Create directory if not Exist
             if (!Directory.Exists(uploadPath))
             {
@@ -70,9 +71,13 @@ public class EditBlogCommandHandler : IRequestHandler<EditBlogCommand, ResponseD
                entity.slug = request.slug ?? SlugHelper.GenerateSlug(request.name);
                entity.updated_at = request.updated_at;
                entity.description = request.description ?? "";
-               entity.meta_description = request.meta_description,
+               entity.meta_description = request.meta_description;
                entity.blog_text = request.blog_text;
-
+               entity.estimated_read_time = request.estimated_read_time;
+               entity.blog_category_id = request.blog_category_id;
+               entity.image = request.image;
+               entity.keywords = request.keywords;
+               entity.show_blog = request.show_blog;
                return slug;
            },
            cancellationToken: cancellationToken

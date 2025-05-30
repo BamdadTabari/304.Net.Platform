@@ -43,24 +43,25 @@ public class EditHandler<TCommand, TEntity>
                     data = null
                 };
             }
+
             if (isNameValid != null && !await isNameValid())
                 return Responses.Exist<string>(default, null, propertyName);
 
             if (await isSlugValid())
                 return Responses.Exist<string>(default, null, slugProperty);
-            var result =  await updateEntity(entity);
+
+            var result = await updateEntity(entity);
 
             var committed = await _unitOfWork.CommitAsync(cancellationToken);
 
             if (!committed)
                 return Responses.ExceptionFail(result, $"{propertyName} ویرایش نشد", 500);
 
-            return Responses.Success<string>(result, "ویرایش با موفقیت انجام شد", 204);
+            return Responses.Success<string>(result, "ویرایش با موفقیت انجام شد", 200);
         }
         catch (Exception ex)
         {
-            // لاگ‌گیری مستقیم با Serilog
-            Log.Error(ex, "خطا در زمان ایجاد موجودیت: {Message}", ex.Message);
+            Log.Error(ex, "خطا در زمان ویرایش موجودیت: {Message}", ex.Message);
             return Responses.ExceptionFail<string>(default, null);
         }
     }
