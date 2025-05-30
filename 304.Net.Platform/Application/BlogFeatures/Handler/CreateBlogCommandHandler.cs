@@ -27,35 +27,12 @@ public class CreateBlogCommandHandler : IRequestHandler<CreateBlogCommand, Respo
         
         if (request.image_file != null)
         {
-            // Define the directory for uploads 
-            var uploadPath = Path.Combine(Directory.GetCurrentDirectory(), "images");
-
-            // Create directory if not Exist
-            if (!Directory.Exists(uploadPath))
-            {
-                Directory.CreateDirectory(uploadPath);
-            }
-
-            // Build file name
-            var newFileName = Guid.NewGuid().ToString() + Path.GetExtension(request.image_file.FileName);
-            var imagePath = Path.Combine(uploadPath, newFileName);
-
-            // Save Image
-            using (var stream = new FileStream(imagePath, FileMode.Create))
-            {
-                await request.image_file.CopyToAsync(stream);
-            }
-            request.image = imagePath;
+            var result = await FileHelper.UploadImage(request.image_file);
+            request.image = result;
         }
         else
         {
-            return new ResponseDto<string>()
-            {
-                data = null,
-                is_success = false,
-                message = "لطفا تصویر شاخص را آپلود کنید",
-                response_code = 400
-            };
+            return Responses.NotValid<string>(data:default ,propName: "تصویر شاخص");
         }
 
         return await _handler.HandleAsync(

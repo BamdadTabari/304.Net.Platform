@@ -13,62 +13,39 @@ public class EditBlogCommandHandler : IRequestHandler<EditBlogCommand, ResponseD
 {
     private readonly EditHandler<EditBlogCommand,Blog> _handler;
     private readonly IUnitOfWork _unitOfWork;
-    public EditBlogCommandHandler(IUnitOfWork unitOfWork, IBlogRepository blogRepository)
+    private readonly IRepository<Blog> _repository;
+    public EditBlogCommandHandler(IUnitOfWork unitOfWork, IBlogRepository blogRepository, IRepository<Blog> repository)
     {
         _unitOfWork = unitOfWork;
-        _handler = new EditHandler<EditBlogCommand, Blog>(unitOfWork,blogRepository);
+        _handler = new EditHandler<EditBlogCommand, Blog>(unitOfWork, blogRepository);
+        _repository = repository;
     }
 
     public async Task<ResponseDto<string>> Handle(EditBlogCommand request, CancellationToken cancellationToken)
     {
+        var entity = await _unitOfWork.BlogRepository.FindSingle(x => x.id == request.id);
+        if (entity == null)
+            return Responses.NotFound<string>(default, "مقاله");
 
         var slug = request.slug ?? SlugHelper.GenerateSlug(request.name);
-        var entity = await _unitOfWork.BlogRepository.FindSingle(x => x.id == request.id);
+
         request.image = entity.image;
         if (request.image_file != null)
         {
-            // Define the directory for uploads 
-            var uploadPath = Path.Combine(Directory.GetCurrentDirectory(), "images");
-            
-            if (entity != null && File.Exists(entity.image))
-                File.Delete(entity.image);
-            // Create directory if not Exist
-            if (!Directory.Exists(uploadPath))
-            {
-                Directory.CreateDirectory(uploadPath);
-            }
-
-            // Build file name
-            var newFileName = Guid.NewGuid().ToString() + Path.GetExtension(request.image_file.FileName);
-            var imagePath = Path.Combine(uploadPath, newFileName);
-
-            // Save Image
-            using (var stream = new FileStream(imagePath, FileMode.Create))
-            {
-                await request.image_file.CopyToAsync(stream);
-            }
-            request.image = imagePath;
-        }
-        else
-        {
-            return new ResponseDto<string>()
-            {
-                data = null,
-                is_success = false,
-                message = "لطفا تصویر شاخص را آپلود کنید",
-                response_code = 400
-            };
+            FileHelper.DeleteImage(entity.image);
+            var result = await FileHelper.UploadImage(request.image_file);
+            request.image = result;
         }
 
         return await _handler.HandleAsync(
            id: request.id,
-           isNameValid: async () => !await _unitOfWork.BlogRepository.ExistsAsync(x => x.name == request.name),
-           isSlugValid: () => _unitOfWork.BlogRepository.ExistsAsync(x => x.slug == slug),
+           isNameValid: async () => !await _repository.ExistsAsync(x => x.name == request.name),
+           isSlugValid: () => _repository.ExistsAsync(x => x.slug == slug),
            propertyName: "مقاله",
            updateEntity: async entity =>
            {
                entity.name = request.name;
-               entity.slug = request.slug ?? SlugHelper.GenerateSlug(request.name);
+               entity.slug = slug;
                entity.updated_at = request.updated_at;
                entity.description = request.description ?? "";
                entity.meta_description = request.meta_description;

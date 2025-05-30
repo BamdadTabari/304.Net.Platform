@@ -76,7 +76,18 @@ public static class Responses
         {
             data = data,
             is_success = true,
-            message = message ?? "عملیات موفق",
+            message = message ?? Messages.Success(),
+            response_code = code
+        };
+    }
+
+    public static ResponseDto<T> NotValid<T>(T? data,string propName = "آیتم",string? message = null, int code = 400)
+    {
+        return new ResponseDto<T>
+        {
+            data = data,
+            is_success = true,
+            message = message ?? Messages.Validate(propName),
             response_code = code
         };
     }
