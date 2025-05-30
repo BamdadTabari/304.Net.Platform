@@ -1,6 +1,7 @@
 ﻿namespace Core.Base.Text;
 public static class Messages
 {
+    public static string ExceptionFail() => "خطایی غیر منتظره رخ داد لطفا دوباره تلاش کنید";
     public static string Fail() => "عملیات ناموفق بود";
 
     public static string Success() => "عملیات موفق بود";

@@ -1,4 +1,5 @@
-﻿using DataLayer.Base.Response;
+﻿using Core.Base.Text;
+using DataLayer.Base.Response;
 using DataLayer.Repository;
 
 namespace DataLayer.Base.Handler;
@@ -12,14 +13,15 @@ public class CreateHandler
     }
 
     public async Task<ResponseDto<TResult>> HandleAsync<TResult>(
-        Func<Task<bool>> isNameValid,
+        Func<Task<bool>>? isNameValid,
         Func<Task<bool>> isSlugValid,
         Func<Task<TResult>> onCreate,
         string propertyName = "نام",
         string slugProperty = "نامک",
+        string? createMessage = "عملیات موفق بود",
         CancellationToken cancellationToken = default)
     {
-        if (!await isNameValid())
+        if (isNameValid != null && !await isNameValid())
             return Responses.Exist<TResult>(default, null, propertyName);
 
         if (await isSlugValid())
@@ -29,11 +31,11 @@ public class CreateHandler
         {
             var result = await onCreate();
             await _unitOfWork.CommitAsync(cancellationToken);
-            return Responses.Success(result, null, 201);
+            return Responses.Success(result, createMessage, 201);
         }
         catch (Exception ex)
         {
-            return Responses.Fail<TResult>(default, ex.Message);
+            return Responses.ExceptionFail<TResult>(default, null);
         }
     }
 }

@@ -26,13 +26,24 @@ public static class Responses
         };
     }
 
-    public static ResponseDto<T> Fail<T>(T? data = default, string? message = null, int code = 500)
+    public static ResponseDto<T> Fail<T>(T? data = default, string? message = null, int code = 400)
     {
         return new ResponseDto<T>
         {
             data = data,
             is_success = false,
             message = message ?? Messages.Fail(),
+            response_code = code
+        };
+    }
+
+    public static ResponseDto<T> ExceptionFail<T>(T? data = default, string? message = null, int code = 500)
+    {
+        return new ResponseDto<T>
+        {
+            data = data,
+            is_success = false,
+            message = message ?? Messages.ExceptionFail(),
             response_code = code
         };
     }
