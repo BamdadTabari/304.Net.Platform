@@ -1,6 +1,7 @@
 ﻿using Core.Pagination;
 using DataLayer.Base.Response;
 using DataLayer.Repository;
+using Serilog;
 
 namespace DataLayer.Base.Handler;
 public class GetPaginatedHandler
@@ -23,7 +24,9 @@ public class GetPaginatedHandler
         }
         catch (Exception ex)
         {
-            return Responses.Fail<PaginatedList<TEntity>>(default, ex.Message);
+            // لاگ‌گیری مستقیم با Serilog
+            Log.Error(ex, "خطا در زمان ایجاد موجودیت: {Message}", ex.Message);
+            return Responses.ExceptionFail<PaginatedList<TEntity>>(default, null);
         }
     }
 }

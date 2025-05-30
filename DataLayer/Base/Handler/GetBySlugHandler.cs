@@ -1,5 +1,6 @@
 ﻿using DataLayer.Base.Response;
 using DataLayer.Repository;
+using Serilog;
 
 namespace DataLayer.Base.Handler;
 public class GetBySlugHandler
@@ -29,7 +30,9 @@ public class GetBySlugHandler
         }
         catch (Exception ex)
         {
-            return Responses.Fail<TDto>(default, ex.Message);
+            // لاگ‌گیری مستقیم با Serilog
+            Log.Error(ex, "خطا در زمان ایجاد موجودیت: {Message}", ex.Message);
+            return Responses.ExceptionFail<TDto>(default, null);
         }
     }
 }

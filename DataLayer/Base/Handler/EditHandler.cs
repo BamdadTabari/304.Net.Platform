@@ -1,6 +1,7 @@
 ﻿using Core.Base.EF;
 using DataLayer.Base.Response;
 using DataLayer.Repository;
+using Serilog;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -25,40 +26,49 @@ public class EditHandler<TCommand, TEntity>
         CancellationToken cancellationToken = default
     )
     {
-        var entity = await _repository.FindSingle(x=>x.id == id);
-
-        if (entity == null)
+        try
         {
+            var entity = await _repository.FindSingle(x => x.id == id);
+
+            if (entity == null)
+            {
+                return new ResponseDto<string>
+                {
+                    is_success = false,
+                    response_code = 404,
+                    message = $"{propertyName} پیدا نشد",
+                    data = null
+                };
+            }
+
+            await updateEntity(entity);
+
+            var committed = await _unitOfWork.CommitAsync(cancellationToken);
+
+            if (!committed)
+            {
+                return new ResponseDto<string>
+                {
+                    is_success = false,
+                    response_code = 500,
+                    message = $"{propertyName} ویرایش نشد",
+                    data = null
+                };
+            }
+
             return new ResponseDto<string>
             {
-                is_success = false,
-                response_code = 404,
-                message = $"{propertyName} پیدا نشد",
-                data = null
+                is_success = true,
+                response_code = 200,
+                message = "ویرایش با موفقیت انجام شد",
+                data = entity.id.ToString()
             };
         }
-
-        await updateEntity(entity);
-
-        var committed = await _unitOfWork.CommitAsync(cancellationToken);
-
-        if (!committed)
+        catch (Exception ex)
         {
-            return new ResponseDto<string>
-            {
-                is_success = false,
-                response_code = 500,
-                message = $"{propertyName} ویرایش نشد",
-                data = null
-            };
+            // لاگ‌گیری مستقیم با Serilog
+            Log.Error(ex, "خطا در زمان ایجاد موجودیت: {Message}", ex.Message);
+            return Responses.ExceptionFail<string>(default, null);
         }
-
-        return new ResponseDto<string>
-        {
-            is_success = true,
-            response_code = 200,
-            message = "ویرایش با موفقیت انجام شد",
-            data = entity.id.ToString()
-        };
     }
 }

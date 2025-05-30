@@ -1,5 +1,6 @@
 ﻿using DataLayer.Base.Response;
 using DataLayer.Repository;
+using Serilog;
 
 namespace DataLayer.Base.Handler;
 public class GetAllHandler
@@ -24,7 +25,9 @@ public class GetAllHandler
         }
         catch (Exception ex)
         {
-            return Responses.Fail<List<TDto>>(default, ex.Message);
+            // لاگ‌گیری مستقیم با Serilog
+            Log.Error(ex, "خطا در زمان ایجاد موجودیت: {Message}", ex.Message);
+            return Responses.ExceptionFail<List<TDto>>(default, null);
         }
     }
 }

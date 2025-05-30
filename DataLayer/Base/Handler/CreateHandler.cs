@@ -1,12 +1,12 @@
 ﻿using Core.Base.Text;
 using DataLayer.Base.Response;
 using DataLayer.Repository;
+using Serilog;
 
 namespace DataLayer.Base.Handler;
 public class CreateHandler
 {
     private readonly IUnitOfWork _unitOfWork;
-
     public CreateHandler(IUnitOfWork unitOfWork)
     {
         _unitOfWork = unitOfWork;
@@ -35,7 +35,10 @@ public class CreateHandler
         }
         catch (Exception ex)
         {
+            // لاگ‌گیری مستقیم با Serilog
+            Log.Error(ex, "خطا در زمان ایجاد موجودیت: {Message}", ex.Message);
             return Responses.ExceptionFail<TResult>(default, null);
         }
     }
+    
 }
