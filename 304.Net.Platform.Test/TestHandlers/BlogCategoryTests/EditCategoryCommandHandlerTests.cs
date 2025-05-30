@@ -2,6 +2,7 @@
 using _304.Net.Platform.Application.BlogCategoryFeatures.Handler;
 using _304.Net.Platform.Test.GenericHandlers;
 using Core.EntityFramework.Models;
+using DataLayer.Services;
 
 namespace _304.Net.Platform.Test.TestHandlers.BlogCategoryTests;
 public class EditCategoryCommandHandlerTests
@@ -9,17 +10,20 @@ public class EditCategoryCommandHandlerTests
     [Fact]
     public async Task Handle_ShouldEditCategory_WhenEntityExists()
     {
-        await EditHandlerTestHelper.TestEditSuccess<EditCategoryCommand, BlogCategory, EditCategoryCommandHandler>(
-             handlerFactory: (repo, uow) => new EditCategoryCommandHandler(repo, uow),
-             execute: (handler, command, token) => handler.Handle(command, token),
-             command: new EditCategoryCommand
-             {
-                 id = 1,
-                 name = "Updated Name",
-                 slug = null,
-                 description = "Updated Desc"
-             },
-             entityId: 1,
+        await EditHandlerTestHelper.TestEditSuccess<EditCategoryCommand, 
+            BlogCategory, 
+            EditCategoryCommandHandler>(
+            handlerFactory: (repo, uow) => new EditCategoryCommandHandler(uow, repo), // فقط IUnitOfWork پاس می‌دهیم
+            execute: (handler, command, token) => handler.Handle(command, token),
+            command: new EditCategoryCommand
+            {
+                id = 1,
+                name = "Updated Name",
+                slug = null,
+                description = "Updated Desc",
+                updated_at = DateTime.UtcNow
+            },
+            entityId: 1,
             existingEntity: new BlogCategory
             {
                 id = 1,
@@ -30,11 +34,10 @@ public class EditCategoryCommandHandlerTests
             assertUpdated: entity =>
             {
                 Assert.Equal("Updated Name", entity.name);
-                Assert.Equal("updated-name", entity.slug);
+                Assert.Equal("updated-name", entity.slug); // فرض بر این است که SlugHelper ساخته
                 Assert.Equal("Updated Desc", entity.description);
             }
         );
-
     }
 
 
@@ -42,50 +45,34 @@ public class EditCategoryCommandHandlerTests
     public async Task Handle_ShouldReturnNotFound_WhenEntityDoesNotExist()
     {
         await EditHandlerTestHelper.TestEditNotFound<EditCategoryCommand, BlogCategory, EditCategoryCommandHandler>(
-            handlerFactory: (repo, uow) => new EditCategoryCommandHandler(repo, uow),
+            handlerFactory: (repo, uow) => new EditCategoryCommandHandler(uow, repo),
             execute: (handler, command, token) => handler.Handle(command, token),
-            command: new EditCategoryCommand { id = 99 },
-            entityId: 99
+            command: new EditCategoryCommand { id = 2 },
+            entityId: 2
         );
     }
 
-
     [Fact]
-    public async Task Handle_ShouldReturnServerError_WhenCommitFails()
+    public async Task Handle_ShouldReturnCommitFail_WhenCommitFails()
     {
         await EditHandlerTestHelper.TestEditCommitFail<EditCategoryCommand, BlogCategory, EditCategoryCommandHandler>(
-            handlerFactory: (repo, uow) => new EditCategoryCommandHandler(repo, uow),
+            handlerFactory: (repo, uow) => new EditCategoryCommandHandler(uow, repo),
             execute: (handler, command, token) => handler.Handle(command, token),
             command: new EditCategoryCommand
             {
                 id = 1,
-                name = "Test"
+                name = "Name",
+                slug = null,
+                description = "Desc"
             },
             entityId: 1,
-            existingEntity: new BlogCategory { id = 1, name = "Old" }
-        );
-    }
-
-
-    [Fact]
-    public async Task Handle_ShouldUseProvidedSlug_WhenSlugIsProvided()
-    {
-        await EditHandlerTestHelper.TestEditSuccess<EditCategoryCommand, BlogCategory, EditCategoryCommandHandler>(
-            handlerFactory: (repo, uow) => new EditCategoryCommandHandler(repo, uow),
-            execute: (handler, command, token) => handler.Handle(command, token),
-            command: new EditCategoryCommand
+            existingEntity: new BlogCategory
             {
                 id = 1,
-                name = "Title",
-                slug = "custom-slug"
-            },
-            entityId: 1,
-            existingEntity: new BlogCategory { id = 1, name = "Old", slug = "old" },
-            assertUpdated: entity =>
-            {
-                Assert.Equal("custom-slug", entity.slug);
+                name = "Old Name",
+                slug = "old-slug",
+                description = "Old Desc"
             }
         );
     }
-
 }

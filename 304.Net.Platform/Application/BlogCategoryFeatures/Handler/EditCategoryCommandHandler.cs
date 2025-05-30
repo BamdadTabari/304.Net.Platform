@@ -14,11 +14,13 @@ public class EditCategoryCommandHandler : IRequestHandler<EditCategoryCommand, R
 {
     private readonly EditHandler<EditCategoryCommand, BlogCategory> _handler;
     private readonly IUnitOfWork _unitOfWork;
-
-    public EditCategoryCommandHandler(IRepository<BlogCategory> repository, IUnitOfWork unitOfWork)
+    private readonly IRepository<BlogCategory> _repository;
+    public EditCategoryCommandHandler(IUnitOfWork unitOfWork, IRepository<BlogCategory> repository)
     {
         _unitOfWork = unitOfWork;
-        _handler = new EditHandler<EditCategoryCommand, BlogCategory>(unitOfWork, repository);
+        // استفاده مستقیم از IUnitOfWork برای دادن Repository به هندلر
+        _handler = new EditHandler<EditCategoryCommand, BlogCategory>(_unitOfWork, repository);
+        _repository = repository;
     }
 
     public async Task<ResponseDto<string>> Handle(EditCategoryCommand request, CancellationToken cancellationToken)
@@ -28,10 +30,10 @@ public class EditCategoryCommandHandler : IRequestHandler<EditCategoryCommand, R
         return await _handler.HandleAsync(
             id: request.id,
             isNameValid: async () =>
-                !await _unitOfWork.BlogCategoryRepository.ExistsAsync(x => x.name == request.name && x.id != request.id),
+                !await _repository.ExistsAsync(x => x.name == request.name && x.id != request.id),
 
             isSlugValid: async () =>
-                await _unitOfWork.BlogCategoryRepository.ExistsAsync(x => x.slug == slug && x.id != request.id),
+                await _repository.ExistsAsync(x => x.slug == slug && x.id != request.id),
 
             updateEntity: async entity =>
             {
@@ -47,5 +49,3 @@ public class EditCategoryCommandHandler : IRequestHandler<EditCategoryCommand, R
         );
     }
 }
-
-
