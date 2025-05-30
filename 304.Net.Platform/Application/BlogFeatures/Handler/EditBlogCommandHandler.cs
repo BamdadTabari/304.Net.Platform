@@ -2,29 +2,30 @@
 using Core.Assistant.Helpers;
 using Core.EntityFramework.Models;
 using DataLayer.Base.Handler;
-using DataLayer.Base.Mapper;
 using DataLayer.Base.Response;
 using DataLayer.Repository;
+using DataLayer.Services;
 using MediatR;
 
 namespace _304.Net.Platform.Application.BlogFeatures.Handler;
 
-public class CreateBlogCommandHandler : IRequestHandler<CreateBlogCommand, ResponseDto<string>>
+public class EditBlogCommandHandler : IRequestHandler<EditBlogCommand, ResponseDto<string>>
 {
-    private readonly CreateHandler _handler;
+    private readonly EditHandler<EditBlogCommand,Blog> _handler;
     private readonly IUnitOfWork _unitOfWork;
-
-    public CreateBlogCommandHandler(IUnitOfWork unitOfWork)
+    private readonly IBlogRepository _repository;
+    public EditBlogCommandHandler(IUnitOfWork unitOfWork, IBlogRepository blogRepository)
     {
         _unitOfWork = unitOfWork;
-        _handler = new CreateHandler(unitOfWork);
+        _repository = blogRepository;
+        _handler = new EditHandler<EditBlogCommand, Blog>(unitOfWork,blogRepository);
     }
 
-    public async Task<ResponseDto<string>> Handle(CreateBlogCommand request, CancellationToken cancellationToken)
+    public async Task<ResponseDto<string>> Handle(EditBlogCommand request, CancellationToken cancellationToken)
     {
-       
+
         var slug = request.slug ?? SlugHelper.GenerateSlug(request.name);
-        
+
         if (request.image_file != null)
         {
             // Define the directory for uploads 
@@ -59,16 +60,21 @@ public class CreateBlogCommandHandler : IRequestHandler<CreateBlogCommand, Respo
         }
 
         return await _handler.HandleAsync(
+           id: request.id,
            isNameValid: async () => !await _unitOfWork.BlogRepository.ExistsAsync(x => x.name == request.name),
            isSlugValid: () => _unitOfWork.BlogRepository.ExistsAsync(x => x.slug == slug),
-           propertyName: "نام مقاله",
-           onCreate: async () =>
+           propertyName: "مقاله",
+           updateEntity: async entity =>
            {
-               var entity = Mapper.Map<CreateBlogCommand, Blog>(request);
-               await _unitOfWork.BlogRepository.AddAsync(entity);
+               entity.name = request.name;
+               entity.slug = request.slug ?? SlugHelper.GenerateSlug(request.name);
+               entity.updated_at = request.updated_at;
+               entity.description = request.description ?? "";
+               entity.meta_description = request.meta_description,
+               entity.blog_text = request.blog_text;
+
                return slug;
            },
-           createMessage: null,
            cancellationToken: cancellationToken
        );
     }

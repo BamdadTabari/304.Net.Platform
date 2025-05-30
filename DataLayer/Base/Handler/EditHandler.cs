@@ -21,8 +21,11 @@ public class EditHandler<TCommand, TEntity>
 
     public async Task<ResponseDto<string>> HandleAsync(
         long id,
-        Func<TEntity, Task> updateEntity,
+        Func<Task<bool>>? isNameValid,
+        Func<Task<bool>> isSlugValid,
+        Func<TEntity, Task<string>> updateEntity,
         string propertyName = "رکورد",
+        string slugProperty = "نامک",
         CancellationToken cancellationToken = default
     )
     {
@@ -40,29 +43,19 @@ public class EditHandler<TCommand, TEntity>
                     data = null
                 };
             }
+            if (isNameValid != null && !await isNameValid())
+                return Responses.Exist<string>(default, null, propertyName);
 
-            await updateEntity(entity);
+            if (await isSlugValid())
+                return Responses.Exist<string>(default, null, slugProperty);
+            var result =  await updateEntity(entity);
 
             var committed = await _unitOfWork.CommitAsync(cancellationToken);
 
             if (!committed)
-            {
-                return new ResponseDto<string>
-                {
-                    is_success = false,
-                    response_code = 500,
-                    message = $"{propertyName} ویرایش نشد",
-                    data = null
-                };
-            }
+                return Responses.ExceptionFail(result, $"{propertyName} ویرایش نشد", 500);
 
-            return new ResponseDto<string>
-            {
-                is_success = true,
-                response_code = 200,
-                message = "ویرایش با موفقیت انجام شد",
-                data = entity.id.ToString()
-            };
+            return Responses.Success<string>(result, "ویرایش با موفقیت انجام شد", 204);
         }
         catch (Exception ex)
         {
