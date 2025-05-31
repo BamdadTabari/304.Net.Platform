@@ -63,7 +63,7 @@ Sample test cases for blog operations
 
 ----
 
-git clone https://github.com/yourusername/304.git
+git clone [https://github.com/yourusername/304.git](https://github.com/BamdadTabari/304.Net.Platform.git)
 cd 304
 dotnet restore
 dotnet run
